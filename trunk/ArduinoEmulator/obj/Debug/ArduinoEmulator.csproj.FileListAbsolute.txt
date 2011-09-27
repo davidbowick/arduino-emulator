@@ -1,0 +1,11 @@
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\bin\Debug\ArduinoEmulator.exe
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\bin\Debug\ArduinoEmulator.pdb
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ResolveAssemblyReference.cache
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.Properties.Resources.resources
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.csproj.GenerateResource.Cache
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.exe
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.pdb
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\bin\Debug\Arduino.dll
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\bin\Debug\Arduino.pdb
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.ArduinoEmulator.resources
+P:\@_Recherche en cour\@Categories\Search Projects Severac\StairLight\Arduino\ArduinoEmulator.Net\ArduinoEmulator\obj\Debug\ArduinoEmulator.Lightuino.LightuinoForm.resources
