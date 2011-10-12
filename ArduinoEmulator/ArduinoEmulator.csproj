@@ -48,11 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArduinoEmulator.cs">
+    <Compile Include="ArduinoEmulatorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ArduinoEmulator.Designer.cs">
-      <DependentUpon>ArduinoEmulator.cs</DependentUpon>
+    <Compile Include="ArduinoEmulatorForm.Designer.cs">
+      <DependentUpon>ArduinoEmulatorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Lightuino\LightuinoForm.cs">
       <SubType>Form</SubType>
@@ -60,18 +60,33 @@
     <Compile Include="Lightuino\LightuinoForm.Designer.cs">
       <DependentUpon>LightuinoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Lightuino\UC_PwmLed.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Lightuino\UC_PwmLed.Designer.cs">
+      <DependentUpon>UC_PwmLed.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ArduinoEmulator.resx">
-      <DependentUpon>ArduinoEmulator.cs</DependentUpon>
+    <EmbeddedResource Include="ArduinoEmulatorForm.resx">
+      <DependentUpon>ArduinoEmulatorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Lightuino\LightuinoForm.resx">
       <DependentUpon>LightuinoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Lightuino\UC_PwmLed.resx">
+      <DependentUpon>UC_PwmLed.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UC\UC_AnalogPin.resx">
+      <DependentUpon>UC_AnalogPin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UC\UC_DigitalPin.resx">
+      <DependentUpon>UC_DigitalPin.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -85,6 +100,19 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="UC\IUC_Pin.cs" />
+    <Compile Include="UC\UC_AnalogPin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UC\UC_AnalogPin.Designer.cs">
+      <DependentUpon>UC_AnalogPin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UC\UC_DigitalPin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UC\UC_DigitalPin.Designer.cs">
+      <DependentUpon>UC_DigitalPin.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

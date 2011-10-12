@@ -1,0 +1,80 @@
+Trouver un moyen pour paramètrer quel type d'arduino on veut utiliser
+Cela agit sur :
+	- digital I/O
+	- analog I/O
+	- PWM
+	- Interrups
+	- ...
+Rechercher "__AVR_ATmega" pour trouver le code qui change
+
+http://fr.wikipedia.org/wiki/Arduino#Mat.C3.A9riel_officiel
+
+
+Versions :
+atmega8
+atmega168	: meme chose que "atmega328p" mais en 16MHz
+atmega328p	: Serial (0(Rx).1(Tx)), 14 Dio, 6 Ai, 6 pwm (3.5.6.9.10.11), 2 inter (2.3), SPI (10(SS).11(MOSI).12(MISO).13(SCK)), TWI(I2C)A4(SDA).A5(SCL)
+atmega1280
+atmega2560	: Serial (0(Rx).1(Tx)), Serial 1(19(Rx).18(Tx)), Serial 2(17(Rx).16(Tx)), Serial 3(15(Rx).14(Tx))
+			  54 Dio, 16 Ai, 14 PWM (0 à 13), 6 inter (2(int0), 3(int1), 18(int5), 19(int4), 20(int3), 21(int2),
+			  SPI (53(SS).51(MOSI).50(MISO).52(SCK)), TWI(I2C)20(SDA).21(SCL)
+
+atmega328p Analog8 : (Lightuino) : meme chose que le "atmega328p" avec 8 entrée analogique au lieux de 6
+
+
+pinMode()
+A0(14) à A5(19) pour utiliser analog en digital
+digitalWrite()
+A0(14) à A5(19) pour utiliser analog en digital
+digitalRead()
+A0(14) à A5(19) pour utiliser analog en digital
+
++ pour les Arduino Mega (A0 à A15)
+
+***********************************************************
+Avec l'option Initialized sur Pin, voir à mettre un coche Show Initialized only
+
+
+Advanced I/O
+Random Numbers
+External Interrupts
+Interrupts
+
+
+Analog I/O
+
+Lightuino :
+	- PWM
+		- StartAutoLoop(4000) pour animation auto à 4000Hz
+		- pwm.loop(); a chaque loop()
+		FlickerBrightness pwm(sinks);
+		Setup()
+			sinks.setBrightness(255);
+			pwm.StartAutoLoop(4000);
+			
+		Loop()
+			pwm.brightness[35] = Lightuino_MAX_BRIGHTNESS-1;
+			leds.brightness[LED_NUMBER] = (0 to LIGHTUINO_MAXBRIGHTNESS-1)
+			
+		
+	- Source driver
+		LightuinoSourceDriver sources;
+		sources.set(0);
+		
+	- IR
+		IrReceiver ir;
+		unsigned long int code = ir.read();
+		
+	- Light sensor
+		LightSensor light;
+		int curval = light.read();
+		
+
+
+Digital I/O
+	- pullup resistor
+
+
+Ajouter des commentaires dans les fonctions
+
+Simuler le stockage PROGMEM par un fichier

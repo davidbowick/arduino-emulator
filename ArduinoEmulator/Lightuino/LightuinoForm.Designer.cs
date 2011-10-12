@@ -36,16 +36,16 @@
             this._panel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this._panel.Location = new System.Drawing.Point(12, 12);
+            this._panel.Location = new System.Drawing.Point(12, 81);
             this._panel.Name = "_panel";
-            this._panel.Size = new System.Drawing.Size(794, 98);
+            this._panel.Size = new System.Drawing.Size(794, 104);
             this._panel.TabIndex = 0;
             // 
             // LightuinoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(818, 122);
+            this.ClientSize = new System.Drawing.Size(818, 197);
             this.Controls.Add(this._panel);
             this.Name = "LightuinoForm";
             this.Text = "Lightuino";
