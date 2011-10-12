@@ -4,11 +4,11 @@
 #define ARDUINO_H
 
 #pragma region Const
-#define OUTPUT 0
-#define INPUT 1
+#define OUTPUT 0x0
+#define INPUT 0x1
 
-#define LOW 0
-#define HIGH 1
+#define LOW  0x0
+#define HIGH 0x1
 
 #define A0 14
 #define A1 15
@@ -18,6 +18,23 @@
 #define A5 19
 #define A6 20
 #define A7 21
+
+//#define A0 54
+//#define A1 55
+//#define A2 56
+//#define A3 57
+//#define A4 58
+//#define A5 59
+//#define A6 60
+//#define A7 61
+//#define A8 62
+//#define A9 63
+//#define A10 64
+//#define A11 65
+//#define A12 66
+//#define A13 67
+//#define A14 68
+//#define A15 69
 #pragma endregion
 
 #pragma region Binary
@@ -555,51 +572,126 @@ namespace Arduino {
 	public ref class Pin
 	{
 	private:
-		int _index, _state, _previousState, _mode;
+		int _pinNumber, _value, _previousValue, _mode;
+		bool _isDigital, _isPwm, _initialized;
 	public:
-		property int Index
+		property int PinNumber
 		{
-			int get() { return _index;}
+			int get() { return _pinNumber;}
 		}
 
-		property int State
+		property int Value
 		{
-			int get() { return _state;}
+			int get() { return _value;}
 			void set(int value)
 			{
-				_previousState = _state;
-				_state = value;
+				_previousValue = _value;
+				_value = value;
 			}
 		}
 
-		property int PreviousState
+		property int PreviousValue
 		{
-			int get() { return _previousState;}
+			int get() { return _previousValue;}
 		}
 
 		property int Mode
 		{
 			int get() { return _mode;}
-			void set(int value) { _mode = value; }
+			void set(int value)
+			{
+				_mode = value;
+				_initialized = true;
+			}
+		}
+
+		property bool IsDigital
+		{
+			bool get() { return _isDigital;}
+		}
+		
+		property bool IsPwm
+		{
+			bool get() { return _isPwm;}
+		}
+
+	internal:
+		property bool Initialized
+		{
+			bool get() { return _initialized;}
 		}
 
 	public:
-		Pin(int index, int state, int mode)
+		Pin(int pinNumber, int value, int mode, bool isDigital)
 		{
-			_index = index;
-			_state = state;
+			_pinNumber = pinNumber;
+			_value = value;
 			_mode = mode;
+			_isDigital = isDigital;
+			_initialized = false;
+			_isPwm = false;
 		}
-
 		virtual String ^ ToString() override
 		{
-			return String::Format("{0}:{1} : {2}",
-				_index,
-				_mode == INPUT ? "I" : "O",
-				_state == HIGH ? "HIGH" : "LOW");
+			return String::Format("{0}{1} as {2} : {3}",
+				(_isDigital) ? "D" : "A",
+				_pinNumber,
+				_mode == INPUT ? "Input" : "Output",
+				_isDigital ? (_value == HIGH ? "HIGH" : "LOW") : _value.ToString());
 		}
 	};
+	 
+	public ref class AtMegaModel
+	{
+	private:
+		String ^ _modelName;
+		cli::array<byte> ^ _digitalPinNumber;
+		cli::array<byte> ^ _analogPinNumber;
+		cli::array<byte> ^ _digitalPWMPinNumber;
+		cli::array<byte> ^ _digitalInterruptPinNumber;
 
+	public:
+
+#pragma region Properties
+		property String ^ ModelName
+		{
+			String ^ get() { return _modelName;}
+		}
+		property cli::array<byte> ^ DigitalPinNumber
+		{
+			cli::array<byte> ^ get() { return _digitalPinNumber;}
+		}
+		property cli::array<byte> ^ AnalogPinNumber
+		{
+			cli::array<byte> ^ get() { return _analogPinNumber;}
+		}
+		property cli::array<byte> ^ DigitalPWMPinNumber
+		{
+			cli::array<byte> ^ get() { return _digitalPWMPinNumber;}
+		}
+		property cli::array<byte> ^ DigitalInterruptPinNumber
+		{
+			cli::array<byte> ^ get() { return _digitalInterruptPinNumber;}
+		}
+#pragma endregion
+
+		AtMegaModel(
+			String ^ modelName,
+			cli::array<byte> ^ digitalPinNumber,
+			cli::array<byte> ^ analogPinNumber,
+			cli::array<byte> ^ digitalPWMPinNumber,
+			cli::array<byte> ^ digitalInterruptPinNumber)
+		{
+			_modelName = modelName;
+			_digitalPinNumber = digitalPinNumber;
+			_analogPinNumber = analogPinNumber;
+			_digitalPWMPinNumber = digitalPWMPinNumber;
+			_digitalInterruptPinNumber = digitalInterruptPinNumber;
+		}
+		virtual String ^ ToString() override
+		{ return _modelName; }
+	};
+	 
 	public ref class ArduinoBase
 	{
 #pragma region Singleton
@@ -608,13 +700,7 @@ namespace Arduino {
 		SynchronizationContext ^ _currentContext;
 		ArduinoBase()
 		{
-			_currentContext = SynchronizationContext::Current;
 			_millisCounter = gcnew Stopwatch();
-			_pins = gcnew List<Pin ^>();
-			for	(int i = 0; i < 14; i++)
-			{
-				_pins->Add(gcnew Pin(i, LOW, OUTPUT));
-			}
 		}
 	public:
 		static property ArduinoBase ^ CurrentInstance
@@ -641,11 +727,14 @@ namespace Arduino {
 		}
 #pragma endregion
 
-#pragma region OnPinChanged
+#pragma region OnPinStateChanged
 	public: event EventHandler ^ OnPinStateChanged;
-	public:
+	internal:
 		void UpdatePinState(Pin ^ pin)
-		{ _currentContext->Send(gcnew SendOrPostCallback(this, &ArduinoBase::OnPinStateChangedEvent), pin); }
+		{
+			if (_currentContext != nullptr)
+				_currentContext->Send(gcnew SendOrPostCallback(this, &ArduinoBase::OnPinStateChangedEvent), pin);
+		}
 	private:
 		void OnPinStateChangedEvent(Object ^ oPin)
 		{ OnPinStateChanged(oPin, nullptr); }
@@ -653,21 +742,46 @@ namespace Arduino {
 
 #pragma region OnPinModeChanged
 	public: event EventHandler ^ OnPinModeChanged;
-	public:
+	internal:
 		void UpdatePinMode(Pin ^ pin)
-		{ _currentContext->Send(gcnew SendOrPostCallback(this, &ArduinoBase::OnPinModeChangedEvent), pin); }
+		{
+			if (_currentContext != nullptr)
+				_currentContext->Send(gcnew SendOrPostCallback(this, &ArduinoBase::OnPinModeChangedEvent), pin);
+		}
 	private:
 		void OnPinModeChangedEvent(Object ^ oPin)
 		{ OnPinModeChanged(oPin, nullptr); }
 #pragma endregion
 
-	public:
+	internal:
 		Stopwatch ^ _millisCounter;
-		List<Pin ^> ^ _pins;
+		Dictionary<int, Pin ^> ^ _pins;
+		AtMegaModel ^ _currentModel;
 
 	public: 
-		void Start()
+		void Start(AtMegaModel ^ currentModel)
 		{
+			_currentModel = currentModel;
+			_pins = gcnew Dictionary<int, Pin ^>();
+
+			// Create digital pins
+			if (_currentModel->DigitalPinNumber == nullptr)
+				throw gcnew ArgumentNullException("Model.DigitalPinNumber");
+			for	(int i = 0; i < _currentModel->DigitalPinNumber->Length; i++)
+			{
+				byte pinNumber = _currentModel->DigitalPinNumber[i];
+				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, OUTPUT, true));
+			}
+
+			// Create analog pins
+			if (_currentModel->AnalogPinNumber == nullptr)
+				throw gcnew ArgumentNullException("Model.AnalogPinNumber");
+			for	(int i = 0; i < _currentModel->AnalogPinNumber->Length; i++)
+			{
+				byte pinNumber = _currentModel->AnalogPinNumber[i];
+				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, OUTPUT, false));
+			}
+
 			_millisCounter->Start();
 
 			//Call implemented Setup
@@ -691,65 +805,245 @@ namespace Arduino {
 
 		}
 
-		void SetInputState(int pin, int state)
+		void SetInputValue(int pin, int value)
 		{
-			Pin ^ cPin = _pins[pin];
-			if (cPin->Mode == OUTPUT)
+			Pin ^ cPin = GetPin(pin);
+			if (cPin->IsDigital && cPin->Mode == OUTPUT)
 				throw gcnew Exception("Unable to set an OUTPUT");
-			cPin->State = state;
+			cPin->Value = value;
 			UpdatePinState(cPin);
 		}
 
-	public:
+		void RefreshForm()
+		{
+			_currentContext = SynchronizationContext::Current;
+			if (_currentContext != nullptr)
+			{
+				// Refresh digital / analog pins
+				for each (Pin ^ pin in _pins->Values)
+				{
+					if (pin->Initialized)
+					{
+						UpdatePinMode(pin);
+						UpdatePinState(pin);
+					}
+				}
+			}
+		}
+
 		virtual String ^ ToString() override
 		{ return this->GetType()->Name;}
+
+		property AtMegaModel ^ CurrentModel
+		{
+			AtMegaModel ^ get() { return _currentModel;}
+			void set(AtMegaModel ^ value) { _currentModel = value; }
+		}
+
+	internal:
+		Pin ^ GetPin(int pinNumber)
+		{
+			Pin ^ cPin;
+			if (_pins->ContainsKey(pinNumber))
+				cPin = _pins[pinNumber];
+
+			if (cPin == nullptr)
+				throw gcnew Exception(String::Format("Unable to find pin {0}.", pinNumber));
+			else
+				return cPin;
+		}
+
+
 	};
 }
 
 #pragma region Digital I/O
 void pinMode(uint8_t pin, uint8_t mode)
 {
-	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->_pins[pin];
+	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
 	cPin->Mode = mode;
 	Arduino::ArduinoBase::CurrentInstance->UpdatePinMode(cPin);
 }
 void digitalWrite(uint8_t pin, uint8_t value)
 {
-	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->_pins[pin];
+	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
 	if (cPin->Mode == INPUT)
-		throw gcnew Exception("Unable to Write an INPUT");
-	cPin->State = value;
+		throw gcnew Exception("Unable to write an INPUT");
+	cPin->Value = value;
 	Arduino::ArduinoBase::CurrentInstance->UpdatePinState(cPin);
 }
 int digitalRead(uint8_t pin)
 {
-	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->_pins[pin];
+	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
 	if (cPin->Mode == OUTPUT)
-		throw gcnew Exception("Unable to Read an OUTPUT");
-	return cPin->State;
+		throw gcnew Exception("Unable to read an OUTPUT");
+	return cPin->Value;
 }
 #pragma endregion
 
 #pragma region Analog I/O
 int analogRead(uint8_t pin)
 {
-	return -1;
+	//pin = 0 to 5
+	//pin = 0 to 7 on Mini & Nano
+	//pin = 0 to 15 on Mega
+
+	//#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+	//	if (pin >= 54) pin -= 54; // allow for channel or pin numbers
+	//#else
+	//	if (pin >= 14) pin -= 14; // allow for channel or pin numbers
+	//#endif
+
+	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
+	if (cPin->IsDigital)
+		throw gcnew Exception(String::Format("Pin {0} is not a analog input", pin));
+	if (cPin->Value < 0)
+		throw gcnew Exception("Analog value must be greater than 0");
+	if (cPin->Value > 1024)
+		throw gcnew Exception("Analog value must be less than 1024");
+
+	return cPin->Value;
 }
-void analogWrite(uint8_t pin, int value)
+void analogWrite(uint8_t pin, int val) //PWM
 {
+	//ATmega168 : 3, 5, 6, 9, 10, 11
+	//ATmega8	: 9, 10, 11
+
+	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
+	if (!cPin->IsDigital)
+		throw gcnew Exception(String::Format("Pin {0} is not a digital pin", pin));
+
+
+
+	pinMode(pin, OUTPUT);
+	if (val == 0)
+	{
+		digitalWrite(pin, LOW);
+	}
+	else if (val == 255)
+	{
+		digitalWrite(pin, HIGH);
+	}
+	else
+	{
+		//switch (digitalPinToTimer(pin)) //Find correct Time id with pin
+		//{
+		//case 0:
+
+		//case NOT_ON_TIMER:
+		//default:
+		if (val < 128) {
+			digitalWrite(pin, LOW);
+		} else {
+			digitalWrite(pin, HIGH);
+		}
+		//}
+	}
 
 }
 #pragma endregion
 
+#pragma region Advanced I/O
+void tone(uint8_t pin, unsigned int frequency, unsigned long duration = 0)
+{ throw gcnew NotImplementedException(); }
+void noTone(uint8_t pin)
+{ throw gcnew NotImplementedException(); }
+//shiftOut(dataPin, clockPin, bitOrder, value) : Pour la com entre microProc
+
+/// <summary>
+/// <para>Retourne la durée d'une impulsion entre l'état de value et le retour à</para>
+/// <para>Si value = HIGH, pulseIn attent que le pin passe à HIGH et compte jusqu'a ce que pin repasse à LOW.</para>
+/// </summary>
+/// <returns>Durée de l'impulsion en µs, 0 si le timeout est écoulé</returns>
+//protected ulong pulseIn(int pin, int value)
+//{
+//    int defautTimeout = 1 * 1000000; //1 second = 1 000 000 µs
+//    return pulseIn(pin, value, defautTimeout);
+//}
+/// <summary>
+/// 
+/// </summary>
+/// <param name="timeout">In microseconds (from 10µs to 3min</param>
+/// <returns></returns>
+//protected ulong pulseIn(int pin, int value, int timeout)
+//{
+//    return 0;
+//}
+#pragma endregion
+
 #pragma region Time
+/// <summary>
+/// Number of milliseconds since the program started
+/// </summary>
 unsigned long millis()
 {
 	return Arduino::ArduinoBase::CurrentInstance->_millisCounter->ElapsedMilliseconds;
 }
+/// <summary>
+/// Number of microseconds since the program started
+/// After approximately 70 minutes, return to 0
+/// </summary>
+unsigned long micros()
+{ throw gcnew NotImplementedException(); }
+/// <summary>
+/// Pauses the program for the amount of time (in miliseconds) specified as parameter
+/// </summary>
 void delay(unsigned long ms)
 {
 	Thread::Sleep(ms);
 }
+/// <summary>
+/// Pauses the program for the amount of time (in microseconds) specified as parameter.
+/// </summary>
+void delayMicroseconds(unsigned int us)
+{ throw gcnew NotImplementedException(); }
+#pragma endregion
+
+#pragma region Math
+#define PI 3.1415926535897932384626433832795
+#define HALF_PI 1.5707963267948966192313216916398
+#define TWO_PI 6.283185307179586476925286766559
+#define DEG_TO_RAD 0.017453292519943295769236907684886
+#define RAD_TO_DEG 57.295779513082320876798154814105
+
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+#define abs(x) ((x)>0?(x):-(x))
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#define radians(deg) ((deg)*DEG_TO_RAD)
+#define degrees(rad) ((rad)*RAD_TO_DEG)
+#define sq(x) ((x)*(x))
+//pow(), sqrt()
+long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+//sin(), cos(), tan()
+#pragma endregion
+
+#pragma region Random Numbers
+//void randomSeed(unsigned int seed)
+//{
+//	if (seed != 0) {
+//	  srandom(seed);
+//	}
+//}
+//long random(long howbig)
+//{
+//	if (howbig == 0) {
+//		return 0;
+//	}
+//	return random() % howbig;
+//}
+//long random(long howsmall, long howbig)
+//{
+//	if (howsmall >= howbig) {
+//		return howsmall;
+//	}
+//	long diff = howbig - howsmall;
+//	return random(diff) + howsmall;
+//}
 #pragma endregion
 
 #pragma region Bits and Bytes
@@ -760,17 +1054,106 @@ void delay(unsigned long ms)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
 #define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
 #define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
+#define bit(b) (1UL << (b))
 #pragma endregion
 
-#pragma region Math
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
-#define abs(x) ((x)>0?(x):-(x))
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-#define radians(deg) ((deg)*DEG_TO_RAD)
-#define degrees(rad) ((rad)*RAD_TO_DEG)
-#define sq(x) ((x)*(x))
+#pragma region External Interrupts
+#define CHANGE 1
+#define FALLING 2
+#define RISING 3
+
+/// <summary>
+/// <para>Initialise une interruption</para>
+/// <para>delay() won't work</para>
+/// <para>millis() will not increment</para>
+/// <para>Serial data lost</para>
+/// <para>Déclare variables as volatile</para>
+/// </summary>
+/// <param name="interrupt">
+/// <para>0 : pin 2</para>
+/// <para>1 : pin 3</para>
+/// <para>On Mega</para>
+/// <para>2 : pin 21</para>
+/// <para>3 : pin 20</para>
+/// <para>4 : pin 19</para>
+/// <para>5 : pin 18</para>
+/// </param>
+/// <param name="function">Function name</param>
+/// <param name="mode">
+/// <para>LOW : to trigger the interrupt whenever the pin is low</para>
+/// <para>CHANGE : to trigger the interrupt whenever the pin changes value</para>
+/// <para>RISING : to trigger when the pin goes from low to high</para>
+/// <para>FALLING : for when the pin goes from high to low</para>
+/// </param>
+/// </summary>
+//void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), int mode)
+//void attachInterrupt(uint8_t interrupt, Action userFunc, int mode)
+//{
+//	_interrupts[interrupt] = userFunc;
+//	_interruptsMode[interrupt] = mode;
+//
+//	if (_interruptsThread == null)
+//	{
+//		_interruptsThread = new Thread(InterruptsThread);
+//		_interruptsThread.Name = "InterruptsThread";
+//		_interruptsThread.IsBackground = true;
+//		_interruptsEnabled = true;
+//		_interruptsThread.Start();
+//	}
+//
+//	//int pin = 13;
+//	//volatile int state = LOW;
+//
+//	//void setup()
+//	//{
+//	//  pinMode(pin, OUTPUT);
+//	//  attachInterrupt(0, blink, CHANGE);
+//	//}
+//	//
+//	//void loop()
+//	//{
+//	//  digitalWrite(pin, state);
+//	//}
+//	//
+//	//void blink()
+//	//{
+//	//  state = !state;
+//	//}
+//}
+/// <summary>
+/// </summary>
+//void detachInterrupt(uint8_t interruptNum)
+//{
+//	if (_interruptsThread != null)
+//	{
+//		_interruptsEnabled = false;
+//		_interruptsThread.Abort();
+//		_interruptsThread = null;
+//	}
+//	_interrupts[interruptNum] = null;
+//	_interruptsMode[interruptNum] = 0;
+//}
+#pragma endregion
+
+#pragma region Interrupts
+/// <summary>
+///Disables interrupts
+/// </summary>
+void noInterrupts()
+{ throw gcnew NotImplementedException(); }
+/// <summary>
+///Re-enables interrupts 
+/// </summary>
+void interrupts()
+{ throw gcnew NotImplementedException(); }
+
+//void loop()
+//{
+//    noInterrupts();
+//    // critical, time-sensitive code here
+//    interrupts();
+//    // other code here
+//}
 #pragma endregion
 
 #endif

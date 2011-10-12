@@ -4,8 +4,17 @@
 #define M5451_NUMOUTS 35
 #define Lightuino_NUMOUTS 70
 #define Lightuino_NUM_SINKS 70
-#define Lightuino_FASTSET 1
-#define Lightuino_BY32 2
+
+// Default selection pin
+#define Lightuino_CLOCK_PIN 7
+#define Lightuino_SER_DATA_LEFT_PIN 6
+#define Lightuino_SER_DATA_RIGHT_PIN 4
+#define Lightuino_BRIGHTNESS_PIN 5
+
+#define Lightuino_SRC_CLOCK_PIN 8
+#define Lightuino_SRC_DATA_PIN 4
+#define Lightuino_SRC_STROBE_PIN 6
+
 
 using namespace System;
 
@@ -76,8 +85,29 @@ namespace Arduino {
 public class LightuinoSink
 {
 public:
+	uint8_t clockPin;
+	uint8_t brightPin;
+	uint8_t serDataPin[2];
+
+	LightuinoSink(uint8_t clkPin=Lightuino_CLOCK_PIN, uint8_t dataPin1=Lightuino_SER_DATA_LEFT_PIN, uint8_t dataPin2=Lightuino_SER_DATA_RIGHT_PIN, uint8_t brightnessPin=Lightuino_BRIGHTNESS_PIN)
+	{
+		clockPin = clkPin;
+		serDataPin[0] = dataPin1;
+		serDataPin[1] = dataPin2;
+		brightPin = brightnessPin;
+
+		pinMode(clkPin, OUTPUT);      // sets the digital pin as output
+		pinMode(serDataPin[0], OUTPUT);      // sets the digital pin as output
+		pinMode(serDataPin[1], OUTPUT);      // sets the digital pin as output
+		pinMode(brightPin,OUTPUT);
+
+	}
+
 	void setBrightness(uint8_t b)
-	{ }
+	{
+		if (brightPin<0xff)
+			analogWrite(brightPin,b);
+	}
 
 	void set(unsigned long int a, unsigned long int b, unsigned long int c)
 	{
@@ -113,6 +143,9 @@ private:
 	}
 
 };
+
+
+
 
 void setbit(unsigned char offset,unsigned long int* a, unsigned long int* b, unsigned char* c)
 {

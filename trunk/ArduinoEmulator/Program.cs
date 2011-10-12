@@ -15,7 +15,7 @@ namespace ArduinoEmulator
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ArduinoEmulator());
+            Application.Run(new ArduinoEmulatorForm());
         }
     }
 }
