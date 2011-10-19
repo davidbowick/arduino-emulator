@@ -24,7 +24,7 @@ namespace ArduinoEmulator.UC
             {
                 _id = value;
                 this.Name = string.Format("{0:00}", _id);
-                this._checkBox.Text = this.Name;
+                this._label.Text = this.Name;
             }
         }
 
@@ -44,14 +44,20 @@ namespace ArduinoEmulator.UC
                     case PinMode.NotInitialized:
                         _checkBox.Enabled = false;
                         _checkBox.FlatStyle = FlatStyle.Flat;
+                        _checkBox.Appearance = Appearance.Button;
+                        _checkBox.FlatAppearance.BorderSize = 1;
                         break;
-                    case PinMode.OUTPUT:
+                    case PinMode.Output:
+                    case PinMode.PWM:
                         _checkBox.Enabled = true;
                         _checkBox.FlatStyle = FlatStyle.Flat;
+                        _checkBox.Appearance = Appearance.Button;
+                        _checkBox.FlatAppearance.BorderSize = 2;
                         break;
-                    case PinMode.INPUT:
+                    case PinMode.Input:
                         _checkBox.Enabled = true;
-                        _checkBox.FlatStyle = FlatStyle.Standard;
+                        _checkBox.FlatStyle = FlatStyle.System;
+                        _checkBox.Appearance = Appearance.Normal;
                         break;
                 }
             }
@@ -64,9 +70,11 @@ namespace ArduinoEmulator.UC
             {
                 switch (_pinMode)
                 {
-                    case PinMode.OUTPUT:
+                    case PinMode.Output:
                         return _checkBox.FlatAppearance.CheckedBackColor.A;
-                    case PinMode.INPUT:
+                    case PinMode.PWM:
+                        return (_checkBox.FlatAppearance.CheckedBackColor.A == 255) ? ArduinoEmulatorForm.HIGH : ArduinoEmulatorForm.LOW;
+                    case PinMode.Input:
                         return (_checkBox.CheckState == CheckState.Checked) ? ArduinoEmulatorForm.HIGH : ArduinoEmulatorForm.LOW;
                     default:
                         return 0;
@@ -79,15 +87,19 @@ namespace ArduinoEmulator.UC
                     case PinMode.NotInitialized:
                         _checkBox.Checked = false;
                         _checkBox.FlatAppearance.CheckedBackColor = Color.FromArgb(0, _checkBox.FlatAppearance.CheckedBackColor);
-                        _checkBox.FlatAppearance.BorderSize = 1;
                         break;
-                    case PinMode.OUTPUT:
-                        _checkBox.Checked = false;
-
-                        _checkBox.FlatAppearance.CheckedBackColor = Color.FromArgb(value, _checkBox.FlatAppearance.CheckedBackColor);
-                        _checkBox.FlatAppearance.BorderSize = (value != 0) ? 2 : 1;
+                    case PinMode.Output:
+                        _checkBox.Checked = true;
+                        int outValue = 0;
+                        if (value == ArduinoEmulatorForm.LOW)
+                            outValue = ArduinoEmulatorForm.LOW;
+                        else if (value == ArduinoEmulatorForm.HIGH)
+                            outValue = 255;
+                        else
+                            outValue = value;
+                        _checkBox.FlatAppearance.CheckedBackColor = Color.FromArgb(outValue, _checkBox.FlatAppearance.CheckedBackColor);
                         break;
-                    case PinMode.INPUT:
+                    case PinMode.Input:
                         if (value == ArduinoEmulatorForm.LOW)
                             _checkBox.CheckState = CheckState.Unchecked;
                         else if (value == ArduinoEmulatorForm.HIGH)
@@ -95,9 +107,10 @@ namespace ArduinoEmulator.UC
                         else
                             _checkBox.CheckState = CheckState.Indeterminate;
                         _checkBox.FlatAppearance.CheckedBackColor = Color.FromArgb(0, _checkBox.FlatAppearance.CheckedBackColor);
-                        _checkBox.FlatAppearance.BorderSize = 1;
                         break;
-                    default:
+                    case PinMode.PWM:
+                        _checkBox.Checked = true;
+                        _checkBox.FlatAppearance.CheckedBackColor = Color.FromArgb(value, _checkBox.FlatAppearance.CheckedBackColor);
                         break;
                 }
             }
@@ -119,7 +132,7 @@ namespace ArduinoEmulator.UC
 
         private void _checkBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (_pinMode != PinMode.INPUT)
+            if (_pinMode != PinMode.Input)
                 return;
 
             _checkBox.Tag = null;
@@ -131,7 +144,7 @@ namespace ArduinoEmulator.UC
         { _checkBox_MouseUp(sender, null); }
         private void _checkBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (_pinMode != PinMode.INPUT)
+            if (_pinMode != PinMode.Input)
                 return;
 
             if (_checkBox.Tag == null)
@@ -140,7 +153,7 @@ namespace ArduinoEmulator.UC
 
         private void _checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (ValueChanged != null)
+            if (ValueChanged != null && _pinMode == PinMode.Input)
                 ValueChanged(this, new PinChangedEventArg(PinNumber, Value));
         }
     }

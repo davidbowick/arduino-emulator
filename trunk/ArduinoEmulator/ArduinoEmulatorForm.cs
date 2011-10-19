@@ -64,7 +64,7 @@ namespace ArduinoEmulator
 
             AtMegaModel atmega328p_6Analog = new AtMegaModel("atmega328p_6Analog", digi_14, ana_6, pwm_6, inter_2);
             AtMegaModel atmega328p_8Analog = new AtMegaModel("atmega328p_8Analog", digi_14, ana_8, pwm_6, inter_2);
-            AtMegaModel atmega2560 = new AtMegaModel("atmega2560", digi_14, ana_8, pwm_6, inter_2);
+            AtMegaModel atmega2560 = new AtMegaModel("atmega2560", digi_54, ana_16, pwm_14, inter_6);
 
             _models = new AtMegaModel[3];
             _models[0] = atmega328p_6Analog;
@@ -86,6 +86,17 @@ namespace ArduinoEmulator
             }
             return res;
         }
+        //private bool[] GeneratePinModeArray(uint[] pins, int lenght)
+        //{
+        //    bool[] res = new bool[lenght];
+        //    for (int i = 0; i < pins.Length; i++)
+        //    {
+        //        int index = (int)pins[i];
+        //        if (index < res.Length)
+        //            res[index] = true;
+        //    }
+        //    return res;
+        //}
         public void LoadModelPins()
         {
             int digitalPinNumber = _currentModel.DigitalPinNumber.Length;
@@ -166,7 +177,7 @@ namespace ArduinoEmulator
         {
             Pin pin = sender as Pin;
             IUC_Pin ucPin = GetPinUC(pin.PinNumber);
-            ucPin.PinMode = (pin.Mode == OUTPUT) ? PinMode.OUTPUT : PinMode.INPUT;
+            ucPin.PinMode = pin.Mode;
 
             // Refresh value
             CurrentArduino_OnPinStateChanged(pin, null);
