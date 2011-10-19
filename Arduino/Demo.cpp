@@ -7,6 +7,7 @@
 
 #define BP 0
 #define BP_LED 13
+#define PWM_LED 11
 
 
 #pragma region "To Reset datas, for emulator only"
@@ -19,8 +20,11 @@ void _Reset()
 void setup()
 {
 	pinMode(BP, INPUT);
+	//pinMode(A0, INPUT);
+
 	pinMode(BP_LED, OUTPUT);
-	pinMode(A0, INPUT);
+	pinMode(A2, OUTPUT);
+	pinMode(PWM_LED, OUTPUT);
 }
 
 void loop()
@@ -31,4 +35,6 @@ void loop()
 		state = HIGH;
 
 	digitalWrite(BP_LED, state);
+	digitalWrite(A2, state);
+	analogWrite(PWM_LED, analogValue);
 }

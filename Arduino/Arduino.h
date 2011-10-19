@@ -10,14 +10,32 @@
 #define LOW  0x0
 #define HIGH 0x1
 
-#define A0 14
-#define A1 15
-#define A2 16
-#define A3 17
-#define A4 18
-#define A5 19
-#define A6 20
-#define A7 21
+
+int A0 = -1;
+int A1 = -1;
+int A2 = -1;
+int A3 = -1;
+int A4 = -1;
+int A5 = -1;
+int A6 = -1;
+int A7 = -1;
+int A8 = -1;
+int A9 = -1;
+int A10 = -1;
+int A11 = -1;
+int A12 = -1;
+int A13 = -1;
+int A14 = -1;
+int A15 = -1;
+
+//#define A0 14
+//#define A1 15
+//#define A2 16
+//#define A3 17
+//#define A4 18
+//#define A5 19
+//#define A6 20
+//#define A7 21
 
 //#define A0 54
 //#define A1 55
@@ -569,10 +587,19 @@ void loop();
 
 namespace Arduino {
 
+	public enum class PinMode
+	{
+		NotInitialized = -1,
+		Output = OUTPUT,
+		Input = INPUT,
+		PWM = 255
+	};
+	 
 	public ref class Pin
 	{
 	private:
-		int _pinNumber, _value, _previousValue, _mode;
+		PinMode _mode;
+		int _pinNumber, _value, _previousValue;
 		bool _isDigital, _isPwm, _initialized;
 	public:
 		property int PinNumber
@@ -595,14 +622,10 @@ namespace Arduino {
 			int get() { return _previousValue;}
 		}
 
-		property int Mode
+		property PinMode Mode
 		{
-			int get() { return _mode;}
-			void set(int value)
-			{
-				_mode = value;
-				_initialized = true;
-			}
+			PinMode get() { return _mode;}
+			void set(PinMode value) {_mode = value;}
 		}
 
 		property bool IsDigital
@@ -615,18 +638,13 @@ namespace Arduino {
 			bool get() { return _isPwm;}
 		}
 
-	internal:
-		property bool Initialized
-		{
-			bool get() { return _initialized;}
-		}
 
 	public:
-		Pin(int pinNumber, int value, int mode, bool isDigital)
+		Pin(int pinNumber, int value, bool isDigital)
 		{
 			_pinNumber = pinNumber;
 			_value = value;
-			_mode = mode;
+			_mode = PinMode::NotInitialized;
 			_isDigital = isDigital;
 			_initialized = false;
 			_isPwm = false;
@@ -636,7 +654,7 @@ namespace Arduino {
 			return String::Format("{0}{1} as {2} : {3}",
 				(_isDigital) ? "D" : "A",
 				_pinNumber,
-				_mode == INPUT ? "Input" : "Output",
+				_mode,
 				_isDigital ? (_value == HIGH ? "HIGH" : "LOW") : _value.ToString());
 		}
 	};
@@ -647,8 +665,8 @@ namespace Arduino {
 		String ^ _modelName;
 		cli::array<byte> ^ _digitalPinNumber;
 		cli::array<byte> ^ _analogPinNumber;
-		cli::array<byte> ^ _digitalPWMPinNumber;
-		cli::array<byte> ^ _digitalInterruptPinNumber;
+		cli::array<bool> ^ _digitalPWMPins;
+		cli::array<bool> ^ _digitalInterruptPins;
 
 	public:
 
@@ -665,13 +683,13 @@ namespace Arduino {
 		{
 			cli::array<byte> ^ get() { return _analogPinNumber;}
 		}
-		property cli::array<byte> ^ DigitalPWMPinNumber
+		property cli::array<bool> ^ DigitalPWMPins
 		{
-			cli::array<byte> ^ get() { return _digitalPWMPinNumber;}
+			cli::array<bool> ^ get() { return _digitalPWMPins;}
 		}
-		property cli::array<byte> ^ DigitalInterruptPinNumber
+		property cli::array<bool> ^ DigitalInterruptPins
 		{
-			cli::array<byte> ^ get() { return _digitalInterruptPinNumber;}
+			cli::array<bool> ^ get() { return _digitalInterruptPins;}
 		}
 #pragma endregion
 
@@ -685,11 +703,27 @@ namespace Arduino {
 			_modelName = modelName;
 			_digitalPinNumber = digitalPinNumber;
 			_analogPinNumber = analogPinNumber;
-			_digitalPWMPinNumber = digitalPWMPinNumber;
-			_digitalInterruptPinNumber = digitalInterruptPinNumber;
+
+			int totalDigitalPin = _digitalPinNumber->Length;
+			_digitalPWMPins = GeneratePinModeArray(totalDigitalPin, digitalPWMPinNumber);
+			_digitalInterruptPins = GeneratePinModeArray(totalDigitalPin, digitalInterruptPinNumber);
 		}
 		virtual String ^ ToString() override
 		{ return _modelName; }
+
+	private:
+		cli::array<bool> ^ GeneratePinModeArray(int length, cli::array<byte> ^ pins)
+		{
+			cli::array<bool> ^ res = gcnew cli::array<bool>(length);
+			for	(int i = 0; i < pins->Length; i++)
+			{
+				int index = (int)pins[i];
+				if (index < length)
+					res[index] = true;
+			}
+			return res;
+		}
+
 	};
 	 
 	public ref class ArduinoBase
@@ -770,7 +804,7 @@ namespace Arduino {
 			for	(int i = 0; i < _currentModel->DigitalPinNumber->Length; i++)
 			{
 				byte pinNumber = _currentModel->DigitalPinNumber[i];
-				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, OUTPUT, true));
+				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, true));
 			}
 
 			// Create analog pins
@@ -779,8 +813,25 @@ namespace Arduino {
 			for	(int i = 0; i < _currentModel->AnalogPinNumber->Length; i++)
 			{
 				byte pinNumber = _currentModel->AnalogPinNumber[i];
-				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, OUTPUT, false));
+				_pins->Add(pinNumber, gcnew Pin(pinNumber, LOW, false));
 			}
+
+			InitConstAnalogPins(&A0, 0);
+			InitConstAnalogPins(&A1, 1);
+			InitConstAnalogPins(&A2, 2);
+			InitConstAnalogPins(&A3, 3);
+			InitConstAnalogPins(&A4, 4);
+			InitConstAnalogPins(&A5, 5);
+			InitConstAnalogPins(&A6, 6);
+			InitConstAnalogPins(&A7, 7);
+			InitConstAnalogPins(&A8, 8);
+			InitConstAnalogPins(&A9, 9);
+			InitConstAnalogPins(&A10, 10);
+			InitConstAnalogPins(&A11, 11);
+			InitConstAnalogPins(&A12, 12);
+			InitConstAnalogPins(&A13, 13);
+			InitConstAnalogPins(&A14, 14);
+			InitConstAnalogPins(&A15, 15);
 
 			_millisCounter->Start();
 
@@ -798,18 +849,37 @@ namespace Arduino {
 		{
 			_Reset();
 			if (_millisCounter != nullptr)
+			{
 				_millisCounter->Stop();
+				_millisCounter->Reset();
+			}
 
 			if(_loopThread != nullptr)
 				_loopThread->Abort();
 
+			A0 = -1;
+			A1 = -1;
+			A2 = -1;
+			A3 = -1;
+			A4 = -1;
+			A5 = -1;
+			A6 = -1;
+			A7 = -1;
+			A8 = -1;
+			A9 = -1;
+			A10 = -1;
+			A11 = -1;
+			A12 = -1;
+			A13 = -1;
+			A14 = -1;
+			A15 = -1;
 		}
 
 		void SetInputValue(int pin, int value)
 		{
 			Pin ^ cPin = GetPin(pin);
-			if (cPin->IsDigital && cPin->Mode == OUTPUT)
-				throw gcnew Exception("Unable to set an OUTPUT");
+			if (cPin->IsDigital && cPin->Mode != PinMode::Input)
+				throw gcnew Exception("Pin is not an INPUT");
 			cPin->Value = value;
 			UpdatePinState(cPin);
 		}
@@ -822,7 +892,7 @@ namespace Arduino {
 				// Refresh digital / analog pins
 				for each (Pin ^ pin in _pins->Values)
 				{
-					if (pin->Initialized)
+					if (pin->Mode != PinMode::NotInitialized)
 					{
 						UpdatePinMode(pin);
 						UpdatePinState(pin);
@@ -853,6 +923,13 @@ namespace Arduino {
 				return cPin;
 		}
 
+		void InitConstAnalogPins(int * pAX, int index)
+		{
+			if (_currentModel->AnalogPinNumber->Length > index)
+			{
+				*pAX = _currentModel->AnalogPinNumber[index];
+			}
+		}
 
 	};
 }
@@ -861,22 +938,27 @@ namespace Arduino {
 void pinMode(uint8_t pin, uint8_t mode)
 {
 	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
-	cPin->Mode = mode;
+	cPin->Mode = (Arduino::PinMode)mode;
 	Arduino::ArduinoBase::CurrentInstance->UpdatePinMode(cPin);
 }
 void digitalWrite(uint8_t pin, uint8_t value)
 {
 	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
-	if (cPin->Mode == INPUT)
-		throw gcnew Exception("Unable to write an INPUT");
+	if (cPin->Mode == Arduino::PinMode::PWM)
+	{
+		cPin->Mode = Arduino::PinMode::Output;
+		Arduino::ArduinoBase::CurrentInstance->UpdatePinMode(cPin);
+	}
+	if (cPin->Mode != Arduino::PinMode::Output)
+		throw gcnew Exception("Pin is not in OUTPUT mode");
 	cPin->Value = value;
 	Arduino::ArduinoBase::CurrentInstance->UpdatePinState(cPin);
 }
 int digitalRead(uint8_t pin)
 {
 	Arduino::Pin ^  cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
-	if (cPin->Mode == OUTPUT)
-		throw gcnew Exception("Unable to read an OUTPUT");
+	if (cPin->Mode != Arduino::PinMode::Input)
+		throw gcnew Exception("Pin is not an INPUT");
 	return cPin->Value;
 }
 #pragma endregion
@@ -906,38 +988,39 @@ int analogRead(uint8_t pin)
 }
 void analogWrite(uint8_t pin, int val) //PWM
 {
-	//ATmega168 : 3, 5, 6, 9, 10, 11
-	//ATmega8	: 9, 10, 11
-
 	Arduino::Pin ^ cPin = Arduino::ArduinoBase::CurrentInstance->GetPin(pin);
 	if (!cPin->IsDigital)
 		throw gcnew Exception(String::Format("Pin {0} is not a digital pin", pin));
+	if (val	> 255)
+		throw gcnew Exception("PWM pin accept 255 max value");
 
-
-
-	pinMode(pin, OUTPUT);
+	//pinMode(pin, OUTPUT);
 	if (val == 0)
-	{
 		digitalWrite(pin, LOW);
-	}
 	else if (val == 255)
-	{
 		digitalWrite(pin, HIGH);
-	}
 	else
 	{
-		//switch (digitalPinToTimer(pin)) //Find correct Time id with pin
-		//{
-		//case 0:
-
-		//case NOT_ON_TIMER:
-		//default:
-		if (val < 128) {
-			digitalWrite(pin, LOW);
-		} else {
-			digitalWrite(pin, HIGH);
+		//If the pin is PWM
+		if (Arduino::ArduinoBase::CurrentInstance->CurrentModel->DigitalPWMPins[pin])
+		{
+			if (cPin->Mode == Arduino::PinMode::Output)
+			{
+				cPin->Mode = Arduino::PinMode::PWM;
+				Arduino::ArduinoBase::CurrentInstance->UpdatePinMode(cPin);
+			}
+			if (cPin->Mode != Arduino::PinMode::PWM)
+				throw gcnew Exception("Pin is not in PWM mode");
+			cPin->Value = val;
+			Arduino::ArduinoBase::CurrentInstance->UpdatePinState(cPin);
 		}
-		//}
+		else
+		{
+			if (val < 128)
+				digitalWrite(pin, LOW);
+			else
+				digitalWrite(pin, HIGH);
+		}
 	}
 
 }

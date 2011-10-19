@@ -5,11 +5,10 @@ using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
+using Arduino;
 
 namespace ArduinoEmulator.UC
 {
-    public enum PinMode { NotInitialized, OUTPUT, INPUT }
-
     public interface IUC_Pin
     {
         event EventHandler<PinChangedEventArg> ValueChanged;
