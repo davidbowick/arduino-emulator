@@ -1,0 +1,37 @@
+http://fr.wikipedia.org/wiki/Arduino#Mat.C3.A9riel_officiel
+
+
+Versions :
+atmega8
+atmega168	: meme chose que "atmega328p" mais en 16MHz
+atmega328p	: Serial (0(Rx).1(Tx)), 14 Dio, 6 Ai, 6 pwm (3.5.6.9.10.11), 2 inter (2.3), SPI (10(SS).11(MOSI).12(MISO).13(SCK)), TWI(I2C)A4(SDA).A5(SCL)
+atmega1280
+atmega2560	: Serial (0(Rx).1(Tx)), Serial 1(19(Rx).18(Tx)), Serial 2(17(Rx).16(Tx)), Serial 3(15(Rx).14(Tx))
+			  54 Dio, 16 Ai, 14 PWM (0 à 13), 6 inter (2(int0), 3(int1), 18(int5), 19(int4), 20(int3), 21(int2),
+			  SPI (53(SS).51(MOSI).50(MISO).52(SCK)), TWI(I2C)20(SDA).21(SCL)
+
+atmega328p Analog8 : (Lightuino) : meme chose que le "atmega328p" avec 8 entrée analogique au lieux de 6
+
+
+pinMode()
+A0(14) à A5(19) pour utiliser analog en digital
+digitalWrite()
+A0(14) à A5(19) pour utiliser analog en digital
+digitalRead()
+A0(14) à A5(19) pour utiliser analog en digital
+
++ pour les Arduino Mega (A0 à A15)
+
+
+***********************************************************
+Pour trouver les changement dans le code, chercher "__AVR_ATmega"
+
+Trouver un moyen pour paramètrer quel type d'arduino on veut utiliser
+Cela agit sur :
+	- digital I/O
+	- analog I/O
+	- PWM
+	- Interrups
+	- ...
+
+
