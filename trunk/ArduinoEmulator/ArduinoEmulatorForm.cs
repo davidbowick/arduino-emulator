@@ -40,7 +40,7 @@ namespace ArduinoEmulator
             LoadModelPins();
 
             _lightuinoForm = new LightuinoForm();
-            //_lightuinoForm.Show();
+            _lightuinoForm.Show();
 
             ArduinoBase.CurrentInstance.OnPinModeChanged += new EventHandler(CurrentArduino_OnPinModeChanged);
             ArduinoBase.CurrentInstance.OnPinStateChanged += new EventHandler(CurrentArduino_OnPinStateChanged);

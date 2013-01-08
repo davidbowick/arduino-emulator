@@ -39,8 +39,8 @@
             this.uC_DigitalPin1 = new ArduinoEmulator.UC.UC_DigitalPin();
             this._analogPinsPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.uC_AnalogPin1 = new ArduinoEmulator.UC.UC_AnalogPin();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.uC_AnalogPin2 = new ArduinoEmulator.UC.UC_AnalogPin();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip.SuspendLayout();
             this._digitalPinsPanel.SuspendLayout();
             this._analogPinsPanel.SuspendLayout();
@@ -103,6 +103,7 @@
             // 
             // _digitalPinsPanel
             // 
+            this._digitalPinsPanel.BackColor = System.Drawing.Color.White;
             this._digitalPinsPanel.Controls.Add(this.uC_DigitalPin1);
             this._digitalPinsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this._digitalPinsPanel.Location = new System.Drawing.Point(0, 0);
@@ -113,6 +114,7 @@
             // uC_DigitalPin1
             // 
             this.uC_DigitalPin1.AutoSize = true;
+            this.uC_DigitalPin1.BackColor = System.Drawing.Color.Transparent;
             this.uC_DigitalPin1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(255)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.uC_DigitalPin1.ID = 0;
             this.uC_DigitalPin1.Location = new System.Drawing.Point(3, 3);
@@ -125,9 +127,11 @@
             // 
             // _analogPinsPanel
             // 
+            this._analogPinsPanel.BackColor = System.Drawing.Color.White;
             this._analogPinsPanel.Controls.Add(this.uC_AnalogPin1);
             this._analogPinsPanel.Controls.Add(this.uC_AnalogPin2);
             this._analogPinsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._analogPinsPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this._analogPinsPanel.Location = new System.Drawing.Point(0, 0);
             this._analogPinsPanel.Name = "_analogPinsPanel";
             this._analogPinsPanel.Size = new System.Drawing.Size(222, 130);
@@ -136,6 +140,7 @@
             // uC_AnalogPin1
             // 
             this.uC_AnalogPin1.AutoSize = true;
+            this.uC_AnalogPin1.BackColor = System.Drawing.Color.Transparent;
             this.uC_AnalogPin1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.uC_AnalogPin1.ID = 0;
             this.uC_AnalogPin1.Location = new System.Drawing.Point(3, 3);
@@ -145,6 +150,20 @@
             this.uC_AnalogPin1.Size = new System.Drawing.Size(99, 23);
             this.uC_AnalogPin1.TabIndex = 0;
             this.uC_AnalogPin1.Value = 0;
+            // 
+            // uC_AnalogPin2
+            // 
+            this.uC_AnalogPin2.AutoSize = true;
+            this.uC_AnalogPin2.BackColor = System.Drawing.Color.Transparent;
+            this.uC_AnalogPin2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.uC_AnalogPin2.ID = 0;
+            this.uC_AnalogPin2.Location = new System.Drawing.Point(3, 32);
+            this.uC_AnalogPin2.Name = "uC_AnalogPin2";
+            this.uC_AnalogPin2.PinMode = Arduino.PinMode.Output;
+            this.uC_AnalogPin2.PinNumber = 0;
+            this.uC_AnalogPin2.Size = new System.Drawing.Size(99, 23);
+            this.uC_AnalogPin2.TabIndex = 1;
+            this.uC_AnalogPin2.Value = 0;
             // 
             // splitContainer1
             // 
@@ -166,19 +185,6 @@
             this.splitContainer1.Size = new System.Drawing.Size(554, 132);
             this.splitContainer1.SplitterDistance = 326;
             this.splitContainer1.TabIndex = 4;
-            // 
-            // uC_AnalogPin2
-            // 
-            this.uC_AnalogPin2.AutoSize = true;
-            this.uC_AnalogPin2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.uC_AnalogPin2.ID = 0;
-            this.uC_AnalogPin2.Location = new System.Drawing.Point(108, 3);
-            this.uC_AnalogPin2.Name = "uC_AnalogPin2";
-            this.uC_AnalogPin2.PinMode = Arduino.PinMode.Output;
-            this.uC_AnalogPin2.PinNumber = 0;
-            this.uC_AnalogPin2.Size = new System.Drawing.Size(99, 23);
-            this.uC_AnalogPin2.TabIndex = 1;
-            this.uC_AnalogPin2.Value = 0;
             // 
             // ArduinoEmulatorForm
             // 
