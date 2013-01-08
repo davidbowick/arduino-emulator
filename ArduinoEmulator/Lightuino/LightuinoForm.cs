@@ -13,7 +13,8 @@ namespace ArduinoEmulator.Lightuino
 {
     public partial class LightuinoForm : Form
     {
-        Dictionary<int, RadioButton> _outputs = new Dictionary<int, RadioButton>();
+        //Dictionary<int, RadioButton> _outputs = new Dictionary<int, RadioButton>();
+        Dictionary<int, UC_PwmLed> _outputs = new Dictionary<int, UC_PwmLed>();
 
         public LightuinoForm()
         {
@@ -21,29 +22,21 @@ namespace ArduinoEmulator.Lightuino
 
             for (int i = 0; i < 70; i++)
             {
-                RadioButton rbtn = new RadioButton();
-                string name = (i + 1).ToString("00");
-                rbtn.Name = name;
-                rbtn.Text = name;
-                rbtn.AutoCheck = false;
-                rbtn.AutoSize = true;
-                _outputs.Add(i, rbtn);
-                _panel.Controls.Add(rbtn);
+                UC_PwmLed led = new UC_PwmLed();
+                led.ID = i;
+                led.Color = Color.Red;
+                led.Value = 0;
+                _outputs.Add(i, led);
+                _panel.Controls.Add(led);
             }
-            Arduino.Lightuino.CurrentInstance.OnPinStateChanged += new EventHandler(CurrentLightuino_OnPinStateChanged);
+            Arduino.Lightuino.CurrentInstance.OnPinStateChanged += new EventHandler<OutputChangedEventArgs>(CurrentLightuino_OnPinStateChanged);
         }
         private void LightuinoForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true;
-        }
+        { e.Cancel = true; }
 
-        private void CurrentLightuino_OnPinStateChanged(object sender, EventArgs e)
+        private void CurrentLightuino_OnPinStateChanged(object sender, OutputChangedEventArgs e)
         {
-            Output output = sender as Output;
-            if (output == null)
-                return;
-
-            _outputs[output.ID].Checked = output.State;
+            _outputs[e.ID].Value = e.Value;
         }
     }
 }

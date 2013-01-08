@@ -572,6 +572,7 @@ int A15 = -1;
 #define uint8_t unsigned int
 typedef uint8_t boolean;
 typedef uint8_t byte;
+#define uint16_t unsigned short int
 #pragma endregion
 
 using namespace System;
@@ -913,14 +914,13 @@ namespace Arduino {
 	internal:
 		Pin ^ GetPin(int pinNumber)
 		{
-			Pin ^ cPin;
+			Pin ^ cPin = nullptr;
 			if (_pins->ContainsKey(pinNumber))
 				cPin = _pins[pinNumber];
 
 			if (cPin == nullptr)
 				throw gcnew Exception(String::Format("Unable to find pin {0}.", pinNumber));
-			else
-				return cPin;
+			return cPin;
 		}
 
 		void InitConstAnalogPins(int * pAX, int index)

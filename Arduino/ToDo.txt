@@ -4,8 +4,19 @@ Random Numbers
 External Interrupts
 Interrupts
 
+Add event Loop
+	- pour afficher visuellement le démarrage d'un nouveau tour de loop
+	- Ajouter un event OnNewLoopBegin
+	
+
 Lightuino :
 	- PWM
+		# Comment faire :
+			- en mode Loop(), faire un refresh des valeurs
+			- en mode Timer, crer un timer .Net qui fait le refresh en auto
+	
+	
+	
 		- StartAutoLoop(4000) pour animation auto à 4000Hz
 		- pwm.loop(); a chaque loop()
 		FlickerBrightness pwm(sinks);
